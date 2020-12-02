@@ -4,7 +4,7 @@ import logo_color from "../../Assets/logo_color.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
 import {List, Divider } from 'antd';
-import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile,Container} from "./StyledHome";
+import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
 import "./Home.css";
 import logo from "../../logo.svg";
 
@@ -28,6 +28,7 @@ class Home extends React.Component {
             count: 60
         };
         this.loadData();
+        console.log()
     }
 
     componentDidMount() {
@@ -37,7 +38,7 @@ class Home extends React.Component {
     loadData = () => {
         axios.get(path + "terms").then(response => {
             for(const  e in response.data){
-                this.board[e] = {num: e, text: response.data[e][0]}
+                this.board[e] = {num: e, text: response.data[e][0], check: false}
             }
             axios.get(path + "definitions").then(response => {
                 for(const e in response.data){
@@ -48,14 +49,13 @@ class Home extends React.Component {
     }
 
     getSeconds = () => {
-        let seconds = 29 - new Date().getSeconds() % 30
+        let seconds = 14 - new Date().getSeconds() % 15
         this.setState({count: seconds})
         if (seconds === 0) {
             axios.post(path + "balot", {
                     "idgame": this.state.idgame,
                     "nickname": this.state.nickname
             }).then(response => {
-                console.log(response)
                 this.setState({number: response.data.balota});
             }).catch(error => {
             });
@@ -66,7 +66,7 @@ class Home extends React.Component {
         setTimeout(() =>{
                 setInterval(this._waitForStart,5000);
             }
-        , (29 - new Date().getSeconds()%30)*1000 + (1005 - new Date().getMilliseconds()) );
+        , (14 - new Date().getSeconds()%15)*1000 + (1005 - new Date().getMilliseconds()) );
     }
 
     _waitForStart = () => {
@@ -124,10 +124,21 @@ class Home extends React.Component {
 
 
     startRoom = () => {
-        this.setState({waiting: true})
-        setTimeout(
-                this._startRoom,
-            (29 - new Date().getSeconds()%30)*1000 + (1000 - new Date().getMilliseconds()) );
+        axios.post(path + "enter",{
+            "nickname": this.state.nickname,
+            "idgame": this.state.idgame
+        }).then(response => {
+                this.setState({
+                    board: response.data.board.substring(2, response.data.board.length-2).split(";"),
+                    waiting: true
+                });
+                setTimeout(
+                    this._startRoom,
+                (14 - new Date().getSeconds()%15)*1000 + (1000 - new Date().getMilliseconds()) );
+            }
+        ).catch(error => {
+        });
+
     }
 
     _startRoom = () => {
@@ -135,26 +146,28 @@ class Home extends React.Component {
             "nickname": this.state.nickname,
             "idgame": this.state.idgame
         }).then(response => {
-                this.setState({
-                    started: true,
-                    state: 1,
-                    waiting: false
-                });
                 axios.post(path + "balot", {
                     "idgame": this.state.idgame,
                     "nickname": this.state.nickname
                 }).then(response => {
-                    console.log(response)
                     this.setState({number: response.data.balota});
+                    setInterval(this.getSeconds,1000);
+                    this.setState({
+                        started: true,
+                        state: 1,
+                        waiting: false
+                    });
                 }).catch(error => {
                 });
             }
         ).catch(error => {
         });
-        setInterval(this.getSeconds,1000);
     }
 
-
+    checkTile = (tile) => {
+        if(this.state.number === tile)
+            this.board[tile].check = true;
+    }
 
     render() {
         return (
@@ -217,15 +230,25 @@ class Home extends React.Component {
                                         grid={{ column: 5 }}
                                         dataSource={this.state.board}
                                         renderItem={item => (
-                                            item !== "C"?
-                                            <Tile>
+                                            item !== "C" && this.board[item]!= undefined ?(
+                                            !this.board[item].check?
+                                            <Tile onClick = {() => this.checkTile(item)}>
                                                 <p>
                                                     <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
                                                 </p>
                                                 <p>
                                                     {this.board[item].text}
                                                 </p>
-                                            </Tile> : <WhiteTile/>
+                                            </Tile> :
+                                            <DisabledTile>
+                                                <p>
+                                                    <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
+                                                </p>
+                                                <p>
+                                                    {this.board[item].text}
+                                                </p>
+                                            </DisabledTile>
+                                            ): <WhiteTile/>
                                         )}
                                     />
 

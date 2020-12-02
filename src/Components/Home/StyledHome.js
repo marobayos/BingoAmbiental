@@ -68,7 +68,7 @@ const DisabledTile = withStyles({
     root : {
         display: 'block',
         lineHeight: '1em',
-        backgroundColor: '#858585',
+        backgroundColor: '#a4a4a4',
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
@@ -168,4 +168,4 @@ const ButtonGreen = withStyles({
 })(Button);
 
 
-export { Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile,Container};
+export { Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container};
