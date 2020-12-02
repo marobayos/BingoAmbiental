@@ -3,16 +3,18 @@ import axios from "axios";
 import logo_color from "../../Assets/logo_color.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
-import {List, Divider, Modal } from 'antd';
+import {List, Divider, Modal, Alert } from 'antd';
 import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
 import "./Home.css";
 import logo from "../../logo.svg";
 
 const path = "http://3.86.110.90:8000/bingo/"
 
+var waitNumber, waitStart;
+
+
 class Home extends React.Component {
     board = {}
-
 
     constructor(props) {
         super(props);
@@ -55,7 +57,7 @@ class Home extends React.Component {
     }
 
     getSeconds = () => {
-        let seconds = 19 - new Date().getSeconds() % 20
+        let seconds = 19 - ( new Date().getSeconds() + 2 )% 20
         this.setState({count: seconds})
         if (seconds === 0) {
             axios.post(path + "balot", {
@@ -68,21 +70,38 @@ class Home extends React.Component {
         }
     }
 
+    getSecondsDelay = () => {
+        let seconds = 19 - ( new Date().getSeconds() ) % 20
+        this.setState({count: seconds})
+        if (seconds === 0) {
+            axios.post(path + "balot", {
+                "idgame": this.state.idgame,
+                "nickname": this.state.nickname
+            }).then(response => {
+                this.setState({number: response.data.balota});
+            }).catch(error => {
+            });
+        }
+    }
+
     waitForStart = () => {
         setTimeout(() =>{
-                setInterval(this._waitForStart,5000);
+                waitStart = setInterval(this._waitForStart,1000);
             }
         , (19 - new Date().getSeconds()%20)*1000 + (1005 - new Date().getMilliseconds()) );
     }
 
     _waitForStart = () => {
-        axios.post(path + "ballot", {
+        axios.post(path + "balot", {
                 "idgame": this.state.idgame,
                 "nickname": this.state.nickname
         }).then(response => {
-            if(response.data.balota !== 0 ){
-                this.setState({started: true, number: response.data.balota});
-                setInterval(this.getSeconds,1000);
+            console.log("Response: ");
+            console.log(response)
+            if(response.data.balota !== "0" ){
+                this.setState({started: true, waiting: false, number: response.data.balota});
+                waitNumber = setInterval(this.getSecondsDelay,500);
+                clearInterval(waitStart);
             }
         });
     }
@@ -118,13 +137,16 @@ class Home extends React.Component {
         }).then(response => {
                 this.setState({
                     state: 1,
-                    idgame: response.data.idgame,
                     board: response.data.board.substring(2, response.data.board.length-2).split(";"),
                     waiting: true
                 });
-                setInterval(this.waitForStart,10000);
+                this.waitForStart();
             }
         ).catch(error => {
+            Modal.error({
+                title: "",
+                content: "No se encontró ninguna partida con el código indicado. Por favor verifique el código e inténtelo nuevamente",
+                centered: true})
         });
     }
 
@@ -157,7 +179,7 @@ class Home extends React.Component {
                     "nickname": this.state.nickname
                 }).then(response => {
                     this.setState({number: response.data.balota});
-                    setInterval(this.getSeconds,1000);
+                    waitNumber = setInterval(this.getSeconds,1000);
                     this.setState({
                         started: true,
                         state: 1,
@@ -179,6 +201,27 @@ class Home extends React.Component {
                 centered: true
             });
         }
+    }
+
+    checkWinner = () => {
+        let check = 0;
+        for (let e in this.board) {
+            if( this.board[e].check )
+                check += 1
+
+        }
+        if( check === 24 )
+            Modal.success({
+                title: "Felicitaciones!",
+                content: "Eres el primero en completar todas las casillas, ganaste!",
+                centered: true
+            });
+        else
+            Modal.error({
+                title: "Lo sentimos",
+                content: "Aún te faltan casillas por marcar, vuelve a intentarlo cuando completes el tablero.",
+                centered: true
+            });
     }
 
     render() {
@@ -267,7 +310,7 @@ class Home extends React.Component {
 
                                 </BoardContent>
                                 <ButtonField>
-                                    <ButtonGreen variant="contained" color="primary" onClick = {this.startRoom}>BINGO!</ButtonGreen>
+                                    <ButtonGreen variant="contained" color="primary" onClick = {this.checkWinner}>BINGO!</ButtonGreen>
                                 </ButtonField>
                             </div>:
                                 this.state.waiting ?
