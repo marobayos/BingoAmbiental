@@ -28,7 +28,7 @@ class Home extends React.Component {
             count: 60
         };
         this.loadData();
-        console.log()
+        console.log(this.state);
     }
 
     componentDidMount() {
@@ -225,6 +225,7 @@ class Home extends React.Component {
                                         {this.state.count}
                                     </Countdown>
                                 </Number>
+                                {console.log(this.state)}
                                 <BoardContent>
                                     <List
                                         grid={{ column: 5 }}
