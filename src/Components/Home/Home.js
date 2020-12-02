@@ -3,7 +3,7 @@ import axios from "axios";
 import logo_color from "../../Assets/logo_color.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
-import {List, Divider } from 'antd';
+import {List, Divider, Modal } from 'antd';
 import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
 import "./Home.css";
 import logo from "../../logo.svg";
@@ -49,7 +49,7 @@ class Home extends React.Component {
     }
 
     getSeconds = () => {
-        let seconds = 14 - new Date().getSeconds() % 15
+        let seconds = 19 - new Date().getSeconds() % 20
         this.setState({count: seconds})
         if (seconds === 0) {
             axios.post(path + "balot", {
@@ -66,7 +66,7 @@ class Home extends React.Component {
         setTimeout(() =>{
                 setInterval(this._waitForStart,5000);
             }
-        , (14 - new Date().getSeconds()%15)*1000 + (1005 - new Date().getMilliseconds()) );
+        , (19 - new Date().getSeconds()%20)*1000 + (1005 - new Date().getMilliseconds()) );
     }
 
     _waitForStart = () => {
@@ -134,7 +134,7 @@ class Home extends React.Component {
                 });
                 setTimeout(
                     this._startRoom,
-                (14 - new Date().getSeconds()%15)*1000 + (1000 - new Date().getMilliseconds()) );
+                (19 - new Date().getSeconds()%20)*1000 + (1000 - new Date().getMilliseconds()) );
             }
         ).catch(error => {
         });
@@ -165,8 +165,14 @@ class Home extends React.Component {
     }
 
     checkTile = (tile) => {
-        if(this.state.number === tile)
+        if(this.state.number === tile) {
             this.board[tile].check = true;
+            Modal.success({
+                title: this.board[tile].text,
+                content: this.board[tile].desc,
+                centered: true
+            });
+        }
     }
 
     render() {
