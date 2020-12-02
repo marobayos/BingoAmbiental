@@ -31,7 +31,7 @@ const Tile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.8em',
+        fontSize: '0.7em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
         '&:hover': {
@@ -47,6 +47,20 @@ const Tile = withStyles({
         '&:focus': {
             boxShadow: '0 0 0 0.2rem rgba(113,191,67,.5)',
         },
+    }
+})(Button);
+
+const WhiteTile = withStyles({
+    root : {
+        display: 'block',
+        lineHeight: '1em',
+        backgroundColor: '#ffffff',
+        alignItems: 'center',
+        width: '9vh',
+        height: '9vh',
+        fontSize: '0.8em',
+        flexWrap: 'noWrap',
+        margin: '0.5em 0',
     }
 })(Button);
 
@@ -142,4 +156,4 @@ const ButtonGreen = withStyles({
 })(Button);
 
 
-export { Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, Container};
+export { Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile,Container};

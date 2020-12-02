@@ -2,8 +2,9 @@ import React from "react";
 import axios from "axios";
 import logo_color from "../../Assets/logo_color.png"
 import "antd/dist/antd.css";
+import { LoadingOutlined } from '@ant-design/icons';
 import {List, Divider } from 'antd';
-import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, Container} from "./StyledHome";
+import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile,Container} from "./StyledHome";
 import "./Home.css";
 import logo from "../../logo.svg";
 
@@ -38,11 +39,9 @@ class Home extends React.Component {
                 this.board[e] = {num: e, text: response.data[e][0]}
             }
             axios.get(path + "definitions").then(response => {
-                console.log(response.data);
                 for(const e in response.data){
                     this.board[e].desc = response.data[e].substring(2,response.data[e].length-2);
                 }
-                console.log(this.board);
             });
         });
     }
@@ -81,7 +80,6 @@ class Home extends React.Component {
                 this.setState({started: true});
                 setInterval(this.getSeconds,1000);
             }
-
         });
     }
 
@@ -91,7 +89,20 @@ class Home extends React.Component {
             this.setState({
                 state: 2,
                 idgame: response.data.idgame,
-                owns: true
+                owns: true,
+                waiting: false
+            });
+            axios.post(path + "enter",{
+                "nickname": this.state.nickname,
+                "idgame": response.data.idgame
+            }).then(response => {
+                    this.setState({
+                        state: 1,
+                        board: response.data.board.substring(2, response.data.board.length-2).split(";")
+                    });
+                }
+            ).catch(error => {
+                console.log(error)
             });
         });
 
@@ -105,8 +116,10 @@ class Home extends React.Component {
                 this.setState({
                     state: 1,
                     idgame: response.data.idgame,
-                    board: response.data.board
+                    board: response.data.board.substring(2, response.data.board.length-2).split(";"),
+                    waiting: true
                 });
+                setInterval(this.waitForStart,10000);
             }
         ).catch(error => {
             console.log(error)
@@ -115,14 +128,28 @@ class Home extends React.Component {
 
 
     startRoom = () => {
+        this.setState({waiting: true})
         setTimeout(
                 this._startRoom,
             (29 - new Date().getSeconds()%30)*1000 + (1000 - new Date().getMilliseconds()) );
     }
 
     _startRoom = () => {
-        this.setState({started: true})
         setInterval(this.getSeconds,1000);
+        axios.post(path + "enter",{
+            "nickname": this.state.nickname,
+            "idgame": this.state.idgame
+        }).then(response => {
+                this.setState({
+                    started: true,
+                    state: 1,
+                    idgame: response.data.idgame,
+                    waiting: false
+                });
+            }
+        ).catch(error => {
+            console.log(error)
+        });
         console.log(this.state);
     }
 
@@ -189,14 +216,16 @@ class Home extends React.Component {
                                         grid={{ column: 5 }}
                                         dataSource={this.state.board}
                                         renderItem={item => (
+                                            item !== "C"?
                                             <Tile>
                                                 <p>
-                                                    <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item.num}</h1>
+                                                    {console.log(item)}
+                                                    <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
                                                 </p>
                                                 <p>
-                                                    {item.text}
+                                                    {this.board[item].text}
                                                 </p>
-                                            </Tile>
+                                            </Tile> : <WhiteTile/>
                                         )}
                                     />
 
@@ -205,10 +234,9 @@ class Home extends React.Component {
                                     <ButtonGreen variant="contained" color="primary" onClick = {this.startRoom}>BINGO!</ButtonGreen>
                                 </ButtonField>
                             </div>:
-                                !this.state.owns ?
-                                    <BoardContent>
-                                        {setInterval(this.waitForStart,1000)}
-                                        <img src={logo_color} className="loading" alt="logo" />
+                                this.state.waiting ?
+                                    <BoardContent >
+                                        <LoadingOutlined style={{ fontSize: '10em', color: '#08c' }} />
                                     </BoardContent> :
                                     <BoardContent>
                                         <ButtonField>
