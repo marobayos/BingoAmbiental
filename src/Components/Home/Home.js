@@ -38,11 +38,17 @@ class Home extends React.Component {
     loadData = () => {
         axios.get(path + "terms").then(response => {
             for(const  e in response.data){
-                this.board[e] = {num: e, text: response.data[e][0], check: false}
+                if(e === "0")
+                    this.board["75"] = {num: "75", text: response.data[e][0], check: false}
+                else
+                    this.board[e] = {num: e, text: response.data[e][0], check: false}
             }
             axios.get(path + "definitions").then(response => {
                 for(const e in response.data){
-                    this.board[e].desc = response.data[e].substring(2,response.data[e].length-2);
+                    if( e === "0")
+                        this.board["75"].desc = response.data[e].substring(2,response.data[e].length-2);
+                    else
+                        this.board[e].desc = response.data[e].substring(2,response.data[e].length-2);
                 }
             });
         });
@@ -231,7 +237,7 @@ class Home extends React.Component {
                                         {this.state.count}
                                     </Countdown>
                                 </Number>
-                                {console.log(this.state)}
+
                                 <BoardContent>
                                     <List
                                         grid={{ column: 5 }}
@@ -255,7 +261,7 @@ class Home extends React.Component {
                                                     {this.board[item].text}
                                                 </p>
                                             </DisabledTile>
-                                            ): <WhiteTile/>
+                                            ): <WhiteTile>{console.log(this.state)}{ console.log(this.board)}</WhiteTile>
                                         )}
                                     />
 
