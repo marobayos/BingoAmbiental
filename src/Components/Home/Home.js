@@ -24,13 +24,14 @@ class Home extends React.Component {
             owns: false,
             waiting: false,
             started: false,
-            number: 'B10',
+            number: '',
             count: 60
         };
+        this.loadData();
     }
 
     componentDidMount() {
-        this.loadData();
+        console.log(this.state);
     }
 
     loadData = () => {
@@ -50,16 +51,13 @@ class Home extends React.Component {
         let seconds = 29 - new Date().getSeconds() % 30
         this.setState({count: seconds})
         if (seconds === 0) {
-            axios.get(path + "balot", {
-                params: {
-                    idgame: "AMNB",
-                    nickname: "Mitos"
-                }
+            axios.post(path + "balot", {
+                    "idgame": this.state.idgame,
+                    "nickname": this.state.nickname
             }).then(response => {
-                console.log(response);
+                console.log(response)
                 this.setState({number: response.data.balota});
             }).catch(error => {
-                console.log(error)
             });
         }
     }
@@ -73,11 +71,11 @@ class Home extends React.Component {
 
     _waitForStart = () => {
         axios.post(path + "ballot", {
-                idgame: this.state.idgame,
-                nickname: this.state.nickname
+                "idgame": this.state.idgame,
+                "nickname": this.state.nickname
         }).then(response => {
             if(response.data.balota !== 0 ){
-                this.setState({started: true});
+                this.setState({started: true, number: response.data.balota});
                 setInterval(this.getSeconds,1000);
             }
         });
@@ -102,7 +100,6 @@ class Home extends React.Component {
                     });
                 }
             ).catch(error => {
-                console.log(error)
             });
         });
 
@@ -122,7 +119,6 @@ class Home extends React.Component {
                 setInterval(this.waitForStart,10000);
             }
         ).catch(error => {
-            console.log(error)
         });
     }
 
@@ -135,7 +131,6 @@ class Home extends React.Component {
     }
 
     _startRoom = () => {
-        setInterval(this.getSeconds,1000);
         axios.post(path + "enter",{
             "nickname": this.state.nickname,
             "idgame": this.state.idgame
@@ -143,14 +138,20 @@ class Home extends React.Component {
                 this.setState({
                     started: true,
                     state: 1,
-                    idgame: response.data.idgame,
                     waiting: false
+                });
+                axios.post(path + "balot", {
+                    "idgame": this.state.idgame,
+                    "nickname": this.state.nickname
+                }).then(response => {
+                    console.log(response)
+                    this.setState({number: response.data.balota});
+                }).catch(error => {
                 });
             }
         ).catch(error => {
-            console.log(error)
         });
-        console.log(this.state);
+        setInterval(this.getSeconds,1000);
     }
 
 
@@ -219,7 +220,6 @@ class Home extends React.Component {
                                             item !== "C"?
                                             <Tile>
                                                 <p>
-                                                    {console.log(item)}
                                                     <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
                                                 </p>
                                                 <p>

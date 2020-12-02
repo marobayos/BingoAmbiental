@@ -64,7 +64,19 @@ const WhiteTile = withStyles({
     }
 })(Button);
 
-// Entschuldigen Sie, Ich möchte gern einen Tella
+const DisabledTile = withStyles({
+    root : {
+        display: 'block',
+        lineHeight: '1em',
+        backgroundColor: '#858585',
+        alignItems: 'center',
+        width: '9vh',
+        height: '9vh',
+        fontSize: '0.8em',
+        flexWrap: 'noWrap',
+        margin: '0.5em 0',
+    }
+})(Button);
 
 const BoardContent = styled.div`
     display: flex;
