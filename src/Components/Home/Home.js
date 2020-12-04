@@ -3,11 +3,11 @@ import axios from "axios";
 import logo_color from "../../Assets/logo_color.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
-import {List, Divider, Modal } from 'antd';
+import {List, Divider, Modal} from 'antd';
 import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
 import "./Home.css";
 
-const path = "http://localhost:8000/bingo/"
+const path = "http://3.86.110.90:8000/bingo/"
 
 var waitNumber, waitStart;
 
