@@ -5,7 +5,7 @@ import logo_tpi from "../../Assets/logo_TPI.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
 import {List, Divider, Modal} from 'antd';
-import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
+import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container, TittleTile, HighlightedTile} from "./StyledHome";
 import "./Home.css";
 
 const path = "http://3.86.110.90:8000/bingo/"
@@ -14,7 +14,7 @@ var waitNumber, waitStart;
 
 
 class Home extends React.Component {
-    board = {}
+    board = {};
 
     constructor(props) {
         super(props);
@@ -28,12 +28,15 @@ class Home extends React.Component {
             waiting: false,
             started: false,
             number: '',
-            count: 60
+            count: 60,
+            paused: false
         };
         this.loadData();
     }
 
-    componentDidMount() {
+    componentWillUnmount() {
+        clearInterval(waitNumber);
+        clearInterval(waitStart);
     }
 
     loadData = () => {
@@ -69,7 +72,8 @@ class Home extends React.Component {
                     "idgame": this.state.idgame,
                     "nickname": this.state.nickname
             }).then(response => {
-                if(response.data.balota+"" === "0"){
+                console.log("getSeconds... "+JSON.stringify(response));
+                if(response.data.balota === "Y"){
                     clearInterval(waitNumber);
                     this.setState({owns: false, waiting: false, started: false});
                 } else if(response.data.balota.includes("X")) {
@@ -78,6 +82,7 @@ class Home extends React.Component {
                     this.finishGame(response.data.balota.substring(1, response.data.balota.length));
                 }else
                     this.setState({number: response.data.balota});
+
             }).catch(error => {
             });
         }
@@ -98,25 +103,27 @@ class Home extends React.Component {
                 "idgame": this.state.idgame,
                 "nickname": this.state.nickname
             }).then(response => {
-                if(response.data.balota+"" === "0"){
+                console.log("getSecondsDelay... "+JSON.stringify(response.data));
+                if(response.data.balota === "Y"){
                     clearInterval(waitNumber);
                     this.setState({owns: false, waiting: false, started: false});
-                } else if(response.data.balota.includes("X")) {
+                }else if(response.data.balota.includes("X")) {
                     clearInterval(waitNumber);
                     this.setState({owns: false, waiting: false, started: false});
                     this.finishGame(response.data.balota.substring(1, response.data.balota.length));
-                }else
-                    this.setState({number: response.data.balota});
+                }else if(this.state.number === response.data.balota){
+                    this.setState({number: response.data.balota, paused: true});
+                } else {
+                    this.setState({paused: false, number: response.data.balota});
+                }
             }).catch(error => {
             });
         }
     }
 
     waitForStart = () => {
-        setTimeout(() =>{
-                waitStart = setInterval(this._waitForStart,1000);
-            }
-        , (19 - new Date().getSeconds()%20)*1000 + (1005 - new Date().getMilliseconds()) );
+        setTimeout(this._waitForStart,
+            (19 - new Date().getSeconds()%20)*1000 + (1005 - new Date().getMilliseconds()) );
     }
 
     _waitForStart = () => {
@@ -125,9 +132,13 @@ class Home extends React.Component {
                 "nickname": this.state.nickname
         }).then(response => {
             if(response.data.balota !== "0" ){
+                console.log("Started waiting for numbers with delay");
                 this.setState({started: true, waiting: false, number: response.data.balota});
-                waitNumber = setInterval(this.getSecondsDelay,500);
+                clearInterval(waitNumber);
+                waitNumber = setInterval(this.getSecondsDelay,1000);
                 clearInterval(waitStart);
+            } else {
+                setTimeout(this._waitForStart, 1000)
             }
         });
     }
@@ -211,7 +222,6 @@ class Home extends React.Component {
             }
         ).catch(error => {
         });
-
     }
 
     _startRoom = () => {
@@ -224,6 +234,7 @@ class Home extends React.Component {
                     "nickname": this.state.nickname
                 }).then(response => {
                     this.setState({number: response.data.balota});
+                    console.log("Started waiting for numbers");
                     waitNumber = setInterval(this.getSeconds,1000);
                     this.setState({
                         started: true,
@@ -289,6 +300,7 @@ class Home extends React.Component {
             number: '',
             count: 60
         })
+        clearInterval(waitNumber);
     }
 
     render() {
@@ -347,11 +359,16 @@ class Home extends React.Component {
                         </div>
                         <Container>
                             <Title> Tablero Ambiental </Title>
-
                             <Subtitle>Sala: {this.state.idgame}</Subtitle>
                             <Subtitle>{this.state.nickname}</Subtitle>
 
                             { this.state.started ?
+                            ( this.state.paused?
+                            <BoardContent>
+                                <Title>Partida pausada</Title>
+                                <Subtitle>La partida se ha pausado pues el administrador ha abandonado la partida, puedes esperar a que regrese o volver al inicio.</Subtitle>
+                                <ButtonGreen variant="contained" color="primary" onClick = {this.regresar}>Regresar</ButtonGreen>
+                            </BoardContent> :
                             <div>
                                 <Number>
                                     {this.state.number}
@@ -359,14 +376,45 @@ class Home extends React.Component {
                                         {this.state.count}
                                     </Countdown>
                                 </Number>
-
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'row',
+                                    justifyContent: 'space-between',
+                                    width: '49vh'}}
+                                >
+                                    <TittleTile>
+                                        <h1 style={{fontSize: '4em', fontWeight: 'bold'}}>B</h1>
+                                    </TittleTile>
+                                    <TittleTile>
+                                        <h1 style={{fontSize: '4em', fontWeight: 'bold'}}>I</h1>
+                                    </TittleTile>
+                                    <TittleTile>
+                                        <h1 style={{fontSize: '4em', fontWeight: 'bold'}}>N</h1>
+                                    </TittleTile>
+                                    <TittleTile>
+                                        <h1 style={{fontSize: '4em', fontWeight: 'bold'}}>G</h1>
+                                    </TittleTile>
+                                    <TittleTile>
+                                        <h1 style={{fontSize: '4em', fontWeight: 'bold'}}>O</h1>
+                                    </TittleTile>
+                                </div>
                                 <BoardContent>
+
                                     <List
                                         grid={{ column: 5 }}
                                         dataSource={this.state.board}
                                         renderItem={item => (
                                             item !== "C" && this.board[item]!== undefined ?(
-                                            !this.board[item].check?
+                                            !this.board[item].check?(
+                                            this.state.number === item?
+                                            <HighlightedTile onClick = {() => this.checkTile(item)}>
+                                                <p>
+                                                    <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
+                                                </p>
+                                                <p>
+                                                    {this.board[item].text}
+                                                </p>
+                                            </HighlightedTile> :
                                             <Tile onClick = {() => this.checkTile(item)}>
                                                 <p>
                                                     <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
@@ -374,7 +422,7 @@ class Home extends React.Component {
                                                 <p>
                                                     {this.board[item].text}
                                                 </p>
-                                            </Tile> :
+                                            </Tile>) :
                                             <DisabledTile>
                                                 <p>
                                                     <h1 style={{fontSize: '3em', fontWeight: 'bold'}}>{item}</h1>
@@ -391,7 +439,7 @@ class Home extends React.Component {
                                 <ButtonField>
                                     <ButtonGreen variant="contained" color="primary" onClick = {this.checkWinner}>BINGO!</ButtonGreen>
                                 </ButtonField>
-                            </div>:
+                            </div>):
                                 this.state.waiting ?
                                     <BoardContent >
                                         <LoadingOutlined style={{ fontSize: '10em', color: '#08c' }} />

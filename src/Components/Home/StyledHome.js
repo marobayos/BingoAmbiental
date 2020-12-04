@@ -15,12 +15,13 @@ const Content = styled.div`
 const Container = styled.div`
     border: #00A550 2px solid;
     width: 70vh;
-    height: 90vh;
+    height: 95vh;
     display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     border-radius: 20px;
     align-items: center;
+    font-size: 1.4vh;
 `;
 
 const Tile = withStyles({
@@ -31,7 +32,7 @@ const Tile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.6em',
+        fontSize: '0.7em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
         overflowWrap: 'break-word',
@@ -59,7 +60,22 @@ const WhiteTile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.6em',
+        fontSize: '0.7em',
+        flexWrap: 'noWrap',
+        margin: '0.5em 0',
+    }
+})(Button);
+
+
+const TittleTile = withStyles({
+    root : {
+        display: 'block',
+        lineHeight: '1em',
+        backgroundColor: '#007dc6',
+        alignItems: 'center',
+        width: '9vh',
+        height: '9vh',
+        fontSize: '0.7em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
     }
@@ -73,11 +89,27 @@ const DisabledTile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.6em',
+        fontSize: '0.7em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
     }
 })(Button);
+
+const HighlightedTile = withStyles({
+    root : {
+        display: 'block',
+        lineHeight: '1em',
+        backgroundColor: '#3cb0c0',
+        alignItems: 'center',
+        width: '9vh',
+        height: '9vh',
+        fontSize: '0.7em',
+        flexWrap: 'noWrap',
+        margin: '0.5em 0',
+    }
+})(Button);
+
+
 
 const BoardContent = styled.div`
     display: flex;
@@ -169,4 +201,4 @@ const ButtonGreen = withStyles({
 })(Button);
 
 
-export { Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container};
+export { Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container, HighlightedTile, TittleTile};
