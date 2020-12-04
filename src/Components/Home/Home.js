@@ -7,7 +7,7 @@ import {List, Divider, Modal } from 'antd';
 import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
 import "./Home.css";
 
-const path = "https://localhost:8000/bingo/"
+const path = "http://localhost:8000/bingo/"
 
 var waitNumber, waitStart;
 
