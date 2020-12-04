@@ -53,6 +53,12 @@ class Home extends React.Component {
                         this.board[e].desc = response.data[e].substring(2,response.data[e].length-2);
                 }
             });
+        }).catch(error => {
+            Modal.error({
+                title: "Error",
+                content: "Error en el servidor, por favor espere unos minutos e ínténtelo nuevamente.",
+                centered: true
+            });
         });
     }
 
