@@ -254,7 +254,7 @@ class Home extends React.Component {
             if( this.board[e].check )
                 check += 1
         }
-        //if( check === 24 ) {
+        if( check === 24 ) {
             this.setState({owns: false, waiting: false, started: false});
             Modal.success({
                 title: "Felicitaciones!",
@@ -268,12 +268,12 @@ class Home extends React.Component {
             }).catch(error => {
             });
             clearInterval(waitNumber);
-        /*}else
+        }else
             Modal.error({
                 title: "Lo sentimos",
                 content: "Aún te faltan casillas por marcar, vuelve a intentarlo cuando completes el tablero.",
                 centered: true
-            });*/
+            });
     }
 
     regresar = () => {
