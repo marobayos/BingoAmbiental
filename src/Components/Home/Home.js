@@ -312,7 +312,13 @@ class Home extends React.Component {
                     </Content>
                     :
                     <Content>
-                        <img src={logo_color} className="App-logo" alt="logo" />
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                            <img src={logo_color} className="App-logo" alt="logo" />
+                            <img src={logo_tpi} className="App-logo" alt="logo" />
+                        </div>
                         <Container>
                             <Title> Tablero Ambiental </Title>
 
