@@ -31,7 +31,7 @@ const Tile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.7em',
+        fontSize: '0.6em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
         '&:hover': {
@@ -58,7 +58,7 @@ const WhiteTile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.8em',
+        fontSize: '0.6em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
     }
@@ -72,7 +72,7 @@ const DisabledTile = withStyles({
         alignItems: 'center',
         width: '9vh',
         height: '9vh',
-        fontSize: '0.8em',
+        fontSize: '0.6em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
     }

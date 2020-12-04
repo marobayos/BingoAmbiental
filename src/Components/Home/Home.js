@@ -8,7 +8,7 @@ import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Tit
 import "./Home.css";
 import logo from "../../logo.svg";
 
-const path = "http://3.86.110.90:8000/bingo/"
+const path = "https://3.86.110.90:8000/bingo/"
 
 var waitNumber, waitStart;
 
@@ -64,10 +64,23 @@ class Home extends React.Component {
                     "idgame": this.state.idgame,
                     "nickname": this.state.nickname
             }).then(response => {
-                this.setState({number: response.data.balota});
+                if(response.data.balota+"" === "0"){
+                    this.setState({owns: false, waiting: false, started: false});
+                } else if(response.data.balota+""[0] === 'X') {
+                    this.setState({owns: false, waiting: false, started: false});
+                    this.finishGame(response.data.balota.substring(1, response.data.balota.length));
+                }else
+                    this.setState({number: response.data.balota});
             }).catch(error => {
             });
         }
+    }
+
+    finishGame = (nick) => {
+        Modal.info({
+            title: "Terminó la partida",
+            content: "El usuario "+nick+" acaba de ganar la partida, crea una nueva sala y vuelve a intentarlo.",
+            centered: true})
     }
 
     getSecondsDelay = () => {
@@ -108,46 +121,62 @@ class Home extends React.Component {
 
 
     createRoom = async () => {
-        axios.get(path + "newgame").then(response => {
-            this.setState({
-                state: 2,
-                idgame: response.data.idgame,
-                owns: true,
-                waiting: false
+        if(this.state.nickname !== null && this.state.nickname !== "") {
+            axios.get(path + "newgame").then(response => {
+                this.setState({
+                    state: 2,
+                    idgame: response.data.idgame,
+                    owns: true,
+                    waiting: false
+                });
+                axios.post(path + "enter", {
+                    "nickname": this.state.nickname,
+                    "idgame": response.data.idgame
+                }).then(response => {
+                        this.setState({
+                            state: 1,
+                            board: response.data.board.substring(2, response.data.board.length - 2).split(";")
+                        });
+                    }
+                ).catch(error => {
+                });
             });
-            axios.post(path + "enter",{
-                "nickname": this.state.nickname,
-                "idgame": response.data.idgame
-            }).then(response => {
-                    this.setState({
-                        state: 1,
-                        board: response.data.board.substring(2, response.data.board.length-2).split(";")
-                    });
-                }
-            ).catch(error => {
+        } else {
+            Modal.error({
+                title: "Error",
+                content: "Por favor ingrese un nombre de usuario.",
+                centered: true
             });
-        });
-
+        }
     }
 
     joinRoom = () => {
-        axios.post(path + "enter",{
+        if(this.state.nickname !== null && this.state.idgame !== null && this.state.nickname !== "" && this.state.idgame !== "") {
+            axios.post(path + "enter", {
                 "nickname": this.state.nickname,
                 "idgame": this.state.idgame
-        }).then(response => {
-                this.setState({
-                    state: 1,
-                    board: response.data.board.substring(2, response.data.board.length-2).split(";"),
-                    waiting: true
+            }).then(response => {
+                    this.setState({
+                        state: 1,
+                        board: response.data.board.substring(2, response.data.board.length - 2).split(";"),
+                        waiting: true
+                    });
+                    this.waitForStart();
+                }
+            ).catch(error => {
+                Modal.error({
+                    title: "",
+                    content: "No se encontró ninguna partida con el código indicado. Por favor verifique el código e inténtelo nuevamente",
+                    centered: true
                 });
-                this.waitForStart();
-            }
-        ).catch(error => {
+            });
+        } else {
             Modal.error({
-                title: "",
-                content: "No se encontró ninguna partida con el código indicado. Por favor verifique el código e inténtelo nuevamente",
-                centered: true})
-        });
+                title: "Error",
+                content: "Por favor ingrese un nombre de usuario.",
+                centered: true
+            });
+        }
     }
 
 
@@ -208,15 +237,21 @@ class Home extends React.Component {
         for (let e in this.board) {
             if( this.board[e].check )
                 check += 1
-
         }
-        if( check === 24 )
+        if( check === 24 ) {
+            this.setState({owns: false, waiting: false, started: false});
             Modal.success({
                 title: "Felicitaciones!",
                 content: "Eres el primero en completar todas las casillas, ganaste!",
                 centered: true
             });
-        else
+            axios.post(path + "winner", {
+                "idgame": this.state.idgame,
+                "nickname": this.state.nickname
+            }).then(response => {
+            }).catch(error => {
+            });
+        }else
             Modal.error({
                 title: "Lo sentimos",
                 content: "Aún te faltan casillas por marcar, vuelve a intentarlo cuando completes el tablero.",
@@ -317,11 +352,16 @@ class Home extends React.Component {
                                     <BoardContent >
                                         <LoadingOutlined style={{ fontSize: '10em', color: '#08c' }} />
                                     </BoardContent> :
+                                (this.state.owns?
                                     <BoardContent>
                                         <ButtonField>
                                             <ButtonGreen variant="contained" color="primary" onClick = {this.startRoom}>Empezar partida</ButtonGreen>
                                         </ButtonField>
+                                    </BoardContent>:
+                                    <BoardContent>
+                                        La partida ha finalizado
                                     </BoardContent>
+                                )
                             }
                         </Container>
                     </Content>
