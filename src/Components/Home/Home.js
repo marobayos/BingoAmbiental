@@ -3,12 +3,11 @@ import axios from "axios";
 import logo_color from "../../Assets/logo_color.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
-import {List, Divider, Modal, Alert } from 'antd';
+import {List, Divider, Modal } from 'antd';
 import {Content, BoardContent, InputField, ButtonField, Inputs, ButtonGreen, Title, Subtitle, Number, Countdown, Tile, WhiteTile, DisabledTile, Container} from "./StyledHome";
 import "./Home.css";
-import logo from "../../logo.svg";
 
-const path = "https://3.86.110.90:8000/bingo/"
+const path = "https://localhost:8000/bingo/"
 
 var waitNumber, waitStart;
 
@@ -327,7 +326,7 @@ class Home extends React.Component {
                                         grid={{ column: 5 }}
                                         dataSource={this.state.board}
                                         renderItem={item => (
-                                            item !== "C" && this.board[item]!= undefined ?(
+                                            item !== "C" && this.board[item]!== undefined ?(
                                             !this.board[item].check?
                                             <Tile onClick = {() => this.checkTile(item)}>
                                                 <p>
