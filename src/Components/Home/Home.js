@@ -22,6 +22,7 @@ class Home extends React.Component {
             state: 0,
             nickname: null,
             idgame: null,
+            idboard: null,
             board: null,
             owns: false,
             waiting: false,
@@ -30,11 +31,9 @@ class Home extends React.Component {
             count: 60
         };
         this.loadData();
-        console.log(this.state);
     }
 
     componentDidMount() {
-        console.log(this.state);
     }
 
     loadData = () => {
@@ -71,8 +70,10 @@ class Home extends React.Component {
                     "nickname": this.state.nickname
             }).then(response => {
                 if(response.data.balota+"" === "0"){
+                    clearInterval(waitNumber);
                     this.setState({owns: false, waiting: false, started: false});
-                } else if(response.data.balota+""[0] === 'X') {
+                } else if(response.data.balota.includes("X")) {
+                    clearInterval(waitNumber);
                     this.setState({owns: false, waiting: false, started: false});
                     this.finishGame(response.data.balota.substring(1, response.data.balota.length));
                 }else
@@ -91,13 +92,21 @@ class Home extends React.Component {
 
     getSecondsDelay = () => {
         let seconds = 19 - ( new Date().getSeconds() ) % 20
-        this.setState({count: seconds})
+        this.setState({count: seconds});
         if (seconds === 0) {
             axios.post(path + "balot", {
                 "idgame": this.state.idgame,
                 "nickname": this.state.nickname
             }).then(response => {
-                this.setState({number: response.data.balota});
+                if(response.data.balota+"" === "0"){
+                    clearInterval(waitNumber);
+                    this.setState({owns: false, waiting: false, started: false});
+                } else if(response.data.balota.includes("X")) {
+                    clearInterval(waitNumber);
+                    this.setState({owns: false, waiting: false, started: false});
+                    this.finishGame(response.data.balota.substring(1, response.data.balota.length));
+                }else
+                    this.setState({number: response.data.balota});
             }).catch(error => {
             });
         }
@@ -115,8 +124,6 @@ class Home extends React.Component {
                 "idgame": this.state.idgame,
                 "nickname": this.state.nickname
         }).then(response => {
-            console.log("Response: ");
-            console.log(response)
             if(response.data.balota !== "0" ){
                 this.setState({started: true, waiting: false, number: response.data.balota});
                 waitNumber = setInterval(this.getSecondsDelay,500);
@@ -141,6 +148,7 @@ class Home extends React.Component {
                 }).then(response => {
                         this.setState({
                             state: 1,
+                            idboard: response.data.idboard,
                             board: response.data.board.substring(2, response.data.board.length - 2).split(";")
                         });
                     }
@@ -164,6 +172,7 @@ class Home extends React.Component {
             }).then(response => {
                     this.setState({
                         state: 1,
+                        idboard: response.data.idboard,
                         board: response.data.board.substring(2, response.data.board.length - 2).split(";"),
                         waiting: true
                     });
@@ -192,6 +201,7 @@ class Home extends React.Component {
             "idgame": this.state.idgame
         }).then(response => {
                 this.setState({
+                    idboard: response.data.idboard,
                     board: response.data.board.substring(2, response.data.board.length-2).split(";"),
                     waiting: true
                 });
@@ -244,7 +254,7 @@ class Home extends React.Component {
             if( this.board[e].check )
                 check += 1
         }
-        if( check === 24 ) {
+        //if( check === 24 ) {
             this.setState({owns: false, waiting: false, started: false});
             Modal.success({
                 title: "Felicitaciones!",
@@ -253,16 +263,32 @@ class Home extends React.Component {
             });
             axios.post(path + "winner", {
                 "idgame": this.state.idgame,
-                "nickname": this.state.nickname
+                "idboard": this.state.idboard
             }).then(response => {
             }).catch(error => {
             });
-        }else
+            clearInterval(waitNumber);
+        /*}else
             Modal.error({
                 title: "Lo sentimos",
                 content: "Aún te faltan casillas por marcar, vuelve a intentarlo cuando completes el tablero.",
                 centered: true
-            });
+            });*/
+    }
+
+    regresar = () => {
+        this.setState({
+            state: 0,
+            nickname: null,
+            idgame: null,
+            idboard: null,
+            board: null,
+            owns: false,
+            waiting: false,
+            started: false,
+            number: '',
+            count: 60
+        })
     }
 
     render() {
@@ -357,7 +383,7 @@ class Home extends React.Component {
                                                     {this.board[item].text}
                                                 </p>
                                             </DisabledTile>
-                                            ): <WhiteTile>{console.log(this.state)}{ console.log(this.board)}</WhiteTile>
+                                            ): <WhiteTile></WhiteTile>
                                         )}
                                     />
 
@@ -378,6 +404,7 @@ class Home extends React.Component {
                                     </BoardContent>:
                                     <BoardContent>
                                         <Subtitle>La partida ha finalizado</Subtitle>
+                                        <ButtonGreen variant="contained" color="primary" onClick = {this.regresar}>Regresar</ButtonGreen>
                                     </BoardContent>
                                 )
                             }
