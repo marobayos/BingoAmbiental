@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import logo_color from "../../Assets/logo_color.png"
+import logo_tpi from "../../Assets/logo_TPI.png"
 import "antd/dist/antd.css";
 import { LoadingOutlined } from '@ant-design/icons';
 import {List, Divider, Modal} from 'antd';
@@ -269,7 +270,13 @@ class Home extends React.Component {
             <div>
                 {this.state.state === 0 ?
                     <Content>
-                        <img src={logo_color} className="App-logo" alt="logo" />
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column'
+                        }}>
+                            <img src={logo_color} className="App-logo" alt="logo" />
+                            <img src={logo_tpi} className="App-logo" alt="logo" />
+                        </div>
                         <div style={{
                             width: 600,
                             height: 400,
@@ -364,7 +371,7 @@ class Home extends React.Component {
                                         </ButtonField>
                                     </BoardContent>:
                                     <BoardContent>
-                                        La partida ha finalizado
+                                        <Subtitle>La partida ha finalizado</Subtitle>
                                     </BoardContent>
                                 )
                             }

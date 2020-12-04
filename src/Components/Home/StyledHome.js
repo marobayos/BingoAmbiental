@@ -34,6 +34,7 @@ const Tile = withStyles({
         fontSize: '0.6em',
         flexWrap: 'noWrap',
         margin: '0.5em 0',
+        overflowWrap: 'break-word',
         '&:hover': {
             backgroundColor: '#70bf44',
             borderColor: '#00A550',
